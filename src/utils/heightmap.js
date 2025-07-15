@@ -1,4 +1,4 @@
-import { Perlin2 } from 'tumult';
+import SimplexNoise from 'simplex-noise';
 
 /**
  * @typedef {Object} HeightmapOptions
@@ -13,7 +13,7 @@ import { Perlin2 } from 'tumult';
  */
 
 /**
- * Generates a 2D heightmap using multi-octave Perlin noise and optional radial gradient.
+ * Generates a 2D heightmap using multi-octave 2D Simplex noise (from 'simplex-noise') and optional radial gradient.
  *
  * @param {number} width - Number of columns in the heightmap
  * @param {number} height - Number of rows in the heightmap
@@ -33,7 +33,9 @@ export function generateHeightmap(width, height, options) {
   } = options;
 
   // Use seed if provided
-  const noise = seed !== undefined ? new Perlin2(seed) : new Perlin2();
+  const noise = seed !== undefined
+    ? new SimplexNoise(seed.toString())
+    : new SimplexNoise();
   const map = Array.from({ length: height }, () => Array(width).fill(0));
 
   // Center for radial gradient
@@ -55,9 +57,9 @@ export function generateHeightmap(width, height, options) {
       let amp = amplitude;
       let freq = frequency;
 
-      // Multi-octave Perlin noise
+      // Multi-octave Simplex noise
       for (let o = 0; o < octaves; o++) {
-        value += noise.gen(nx * freq, ny * freq) * amp;
+        value += noise.noise2D(nx * freq, ny * freq) * amp;
         amp *= persistence;
         freq *= lacunarity;
       }
