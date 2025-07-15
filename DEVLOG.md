@@ -10,6 +10,7 @@ All entries in YYYY-MM-DD format.
 - **Biomes Module**: Added `assignBiomes` in `src/utils/biomes.js` with full test coverage for biome assignment and threshold overrides.
 
 ## 2025-07-16
+- **Render Module**: Created `src/utils/render.js` with JSDoc and placeholder logic for drawing contours, rivers, filling biomes, and rendering the map. Added minimal Vitest test suite (`render.test.js`) and set up jsdom environment for SVG testing.
 - **Documentation**: Updated `README.md` to fully describe all modules, options, and test setup, including `render.js` and jsdom requirements. Confirmed all modules have JSDoc and inline documentation. Added a development section to the README. Maintenance and documentation work completed.
 
 <!-- Add future entries here as tasks progress --> 
