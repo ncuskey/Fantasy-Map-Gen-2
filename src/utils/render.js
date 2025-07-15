@@ -1,3 +1,9 @@
+import { generateMoistureMap } from './moisture.js';
+import { assignBiomes } from './biomes.js';
+import { generateSeaMask, smoothSeaMask } from './sea.js';
+import { generateSettlements } from './settlements.js';
+import { generateRoads } from './roads.js';
+
 /**
  * @typedef {Object} ContourOptions
  * @property {number} interval - Elevation interval between contours
@@ -24,6 +30,21 @@
  * @property {RiverRenderOptions} [rivers]
  * @property {Record<string,string>} [biomePalette]
  * @property {CoastlineOptions} [coastline]
+ */
+
+/**
+ * @typedef {{ x: number; y: number }} Point
+ * @typedef {Object} SettlementRenderOptions
+ * @property {number} [symbolSize=5] - Radius of the settlement symbol
+ * @property {string} [fillColor='#ffffff'] - Fill color of the symbol
+ * @property {string} [strokeColor='#000000'] - Outline color of the symbol
+ * @property {boolean} [label=false] - Whether to render a text label
+ * @property {string} [labelFont='10px sans-serif'] - Font for labels
+ */
+/**
+ * @typedef {Object} RoadRenderOptions
+ * @property {number} [strokeWidth=2] - Width of the road stroke
+ * @property {string} [strokeColor='#888888'] - Color of the road stroke
  */
 
 /**
@@ -85,10 +106,65 @@ function drawGreyscaleOverlay(svg, map, className = 'moisture-debug') {
 }
 
 /**
+ * Renders settlement symbols onto the SVG.
+ * @param {SVGElement} svg - The target SVG element
+ * @param {Point[]} towns - Array of settlement coordinates
+ * @param {SettlementRenderOptions} options - Rendering options
+ */
+export function drawSettlements(svg, towns, options = {}) {
+  const {
+    symbolSize = 5,
+    fillColor = '#ffffff',
+    strokeColor = '#000000',
+    label = false,
+    labelFont = '10px sans-serif',
+  } = options;
+  towns.forEach(({ x, y }, i) => {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx', String(x));
+    circle.setAttribute('cy', String(y));
+    circle.setAttribute('r', String(symbolSize));
+    circle.setAttribute('fill', fillColor);
+    circle.setAttribute('stroke', strokeColor);
+    svg.appendChild(circle);
+    if (label) {
+      const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+      text.setAttribute('x', String(x + symbolSize + 2));
+      text.setAttribute('y', String(y));
+      text.setAttribute('font', labelFont);
+      text.textContent = `Town ${i+1}`;
+      svg.appendChild(text);
+    }
+  });
+}
+
+/**
+ * Renders road polylines onto the SVG.
+ * @param {SVGElement} svg - The target SVG element
+ * @param {{ path: Point[] }[]} roads - Array of road objects
+ * @param {RoadRenderOptions} options - Rendering options
+ */
+export function drawRoads(svg, roads, options = {}) {
+  const {
+    strokeWidth = 2,
+    strokeColor = '#888888',
+  } = options;
+  roads.forEach(({ path }) => {
+    const d = path.map(({x,y}, i) => `${i===0 ? 'M' : 'L'}${x} ${y}`).join(' ');
+    const roadPath = document.createElementNS('http://www.w3.org/2000/svg','path');
+    roadPath.setAttribute('d', d);
+    roadPath.setAttribute('fill', 'none');
+    roadPath.setAttribute('stroke-width', String(strokeWidth));
+    roadPath.setAttribute('stroke', strokeColor);
+    svg.appendChild(roadPath);
+  });
+}
+
+/**
  * Renders the full map into a container by ID, creating an SVG and calling the above functions.
  * @param {string} canvasId - The ID of the container element
- * @param {{heightmap: number[][], rivers: Array<Array<{x:number,y:number}>>, biomes?: string[][], moistureMap?: number[][]}} data - Map data
- * @param {RenderOptions & {seaLevel?: number, coastSmoothness?: number, moisture?: object, debugMoisture?: boolean}} options - Rendering options for contours, rivers, biomes, coastline, and moisture
+ * @param {{heightmap: number[][], rivers: Array<Array<{x:number,y:number}>>, biomes?: string[][], moistureMap?: number[][], settlements?: Array<{x:number,y:number}>, roads?: Array<{path: Array<{x:number,y:number}>}>}} data - Map data
+ * @param {RenderOptions & {seaLevel?: number, coastSmoothness?: number, moisture?: object, debugMoisture?: boolean, settlements?: object, debugSettlements?: boolean, roads?: object, debugRoads?: boolean}} options - Rendering options for contours, rivers, biomes, coastline, moisture, settlements, and roads
  */
 export function renderMap(canvasId, data, options) {
   // Create SVG element
@@ -112,9 +188,35 @@ export function renderMap(canvasId, data, options) {
     biomes = assignBiomes(data.heightmap, moistureMap, options.biomeOptions);
   }
 
+  // Generate settlements if not provided
+  let settlements = data.settlements;
+  if (!settlements && options.settlements) {
+    settlements = generateSettlements(
+      data.heightmap,
+      biomes,
+      options.settlements
+    );
+  }
+
+  // Generate roads if not provided
+  let roads = data.roads;
+  if (!roads && settlements && options.roads) {
+    roads = generateRoads(settlements, options.roads);
+  }
+
   // Debug overlay for moisture
   if (options.debugMoisture) {
     drawGreyscaleOverlay(svg, moistureMap, 'moisture-debug');
+  }
+
+  // Debug overlay for settlements
+  if (options.debugSettlements && settlements) {
+    drawSettlements(svg, settlements, 'settlement-debug');
+  }
+
+  // Debug overlay for roads
+  if (options.debugRoads && roads) {
+    drawRoads(svg, roads, 'road-debug');
   }
 
   // Fill biomes
@@ -131,4 +233,15 @@ export function renderMap(canvasId, data, options) {
   if (data.heightmap && options.contours) drawContours(svg, data.heightmap, options.contours);
   // Draw rivers
   if (data.rivers && options.rivers) drawRivers(svg, data.rivers, options.rivers);
+  // Draw roads and settlements overlays
+  if (data.roads && data.roads.length) drawRoads(svg, data.roads, options.roadRender);
+  if (data.towns && data.towns.length) drawSettlements(svg, data.towns, options.settlementRender);
+  // Draw settlements (main overlay)
+  if (settlements && !options.debugSettlements) {
+    drawSettlements(svg, settlements, 'settlement');
+  }
+  // Draw roads (main overlay)
+  if (roads && !options.debugRoads) {
+    drawRoads(svg, roads, 'road');
+  }
 } 
