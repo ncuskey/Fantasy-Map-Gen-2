@@ -27,10 +27,8 @@ Run the Vitest suite with:
 ```bash
 npm test
 ```
-`src/utils/heightmap.test.js` validates deterministic noise, normalization, and falloff.
-// (And in future)
-
-`src/utils/hydrology.test.js` can cover flow‐direction and accumulation rules.
+- `src/utils/heightmap.test.js` validates deterministic noise, normalization, and falloff.
+- `src/utils/hydrology.test.js` covers flow direction, accumulation, and river extraction.
 
 ## Contributing
 
