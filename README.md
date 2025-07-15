@@ -54,3 +54,34 @@ npm test
 ## Contributing
 
 Contributions welcome! Please submit pull requests and follow established coding conventions. 
+
+## Frontend React App (`frontend/`)
+
+The frontend is a Vite-powered React app for interactive procedural map generation and export.
+
+### Project Structure
+
+- `frontend/src/App.jsx` — Main app, manages generator state and ties together all components.
+- `frontend/src/components/ControlPanel.jsx` — UI for adjusting map generation parameters (seed, sea level, noise, towns, roads, etc.).
+- `frontend/src/components/MapCanvas.jsx` — Renders the SVG map using the backend's renderMap utility.
+- `frontend/src/components/ExportButtons.jsx` — Provides buttons to export the map as SVG, PNG, or JSON using the shared export utilities.
+- `frontend/src/utils/` — Contains all backend utility modules (copied from `src/utils/`), reused directly in the browser.
+- `frontend/src/index.css` — CSS for layout and styling (flexbox, sidebar, map container, export buttons).
+
+### Usage
+
+1. Install dependencies:
+   ```sh
+   cd frontend
+   npm install
+   ```
+2. Start the dev server:
+   ```sh
+   npm run dev
+   ```
+3. Open the local dev URL (usually http://localhost:5173) to use the app.
+
+### Notes
+- All map generation logic is shared between backend and frontend via ES6 modules.
+- The UI is modular and extensible, with all generator parameters exposed for live tweaking.
+- Export options use the same tested logic as the backend. 

@@ -29,4 +29,11 @@ All entries in YYYY-MM-DD format.
 - All functions are pure and documented.
 - Added comprehensive Vitest tests in `src/utils/export.test.js` for SVG, JSON, and PNG export.
 
+### [YYYY-MM-DD] Frontend React app scaffolded
+- Created `frontend/` with Vite + React template.
+- Added main components: `App.jsx`, `ControlPanel.jsx`, `MapCanvas.jsx`, `ExportButtons.jsx`.
+- Copied all backend utility modules to `frontend/src/utils/` for direct reuse.
+- Added CSS for layout and styling in `frontend/src/index.css`.
+- App is started with `npm run dev` from the `frontend` directory.
+
 <!-- Add future entries here as tasks progress --> 
