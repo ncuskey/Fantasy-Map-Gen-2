@@ -15,6 +15,7 @@ All entries in YYYY-MM-DD format.
 - **Moisture Integration**: Integrated `generateMoistureMap` from `src/utils/moisture.js` into the render pipeline. Biome assignment now uses the generated moisture field, and a `debugMoisture` overlay option is available for visualizing the moisture map in the SVG output.
 - **Settlements Integration**: Integrated `generateSettlements` from `src/utils/settlements.js` into the render pipeline. Settlement placement now uses Poisson-disc sampling with elevation, biome, and spacing constraints, and a `debugSettlements` overlay option is available for visualizing settlements in the SVG output.
 - **Roads Integration**: Integrated `generateRoads` from `src/utils/roads.js` into the render pipeline. Road network generation now uses MST, extra edges, and jitter, and a `debugRoads` overlay option is available for visualizing roads in the SVG output.
+- **Render Exports**: `drawSettlements` and `drawRoads` are now exported from `render.js` with full rendering options and typedefs. Overlay rendering is tested in `render.test.js`.
 - **Documentation**: Updated `README.md` to fully describe all modules, options, and test setup, including `render.js` and jsdom requirements. Confirmed all modules have JSDoc and inline documentation. Added a development section to the README. Maintenance and documentation work completed.
 
 <!-- Add future entries here as tasks progress --> 

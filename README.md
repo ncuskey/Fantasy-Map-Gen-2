@@ -23,7 +23,7 @@ npm start
 - `src/utils/sea.js` — Sea mask generation (`generateSeaMask`) and smoothing (`smoothSeaMask`) utilities for coastline detection and cleanup.
 - `src/utils/settlements.js` — Settlement placement using Poisson-disc sampling with elevation, biome, and spacing constraints (`generateSettlements`).
 - `src/utils/roads.js` — Road network generation using MST, extra edges, and jitter (`generateRoads`).
-- `src/utils/render.js` — SVG rendering pipeline for map elements. Integrates coastline rendering (see options: `seaLevel`, `coastSmoothness`), moisture map generation (`moisture`), settlement placement (`settlements`), road network generation (`roads`), and debug overlays for moisture (`debugMoisture`), settlements (`debugSettlements`), and roads (`debugRoads`). Biomes now reflect the generated moisture field. Requires a DOM environment (jsdom) for testing.
+- `src/utils/render.js` — SVG rendering pipeline for map elements. Exports `drawSettlements` and `drawRoads` with full rendering options and typedefs. Integrates coastline rendering (see options: `seaLevel`, `coastSmoothness`), moisture map generation (`moisture`), settlement placement (`settlements`), road network generation (`roads`), and debug overlays for moisture (`debugMoisture`), settlements (`debugSettlements`), and roads (`debugRoads`). Biomes now reflect the generated moisture field. Requires a DOM environment (jsdom) for testing.
 - `DEVLOG.md` — Development log tracking changes and decisions.
 
 ## Tests
