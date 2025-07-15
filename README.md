@@ -19,7 +19,8 @@ npm start
 - `src/utils/heightmap.js` — Heightmap generation with multi-octave simplex-noise and deterministic seeding via seedrandom. Supports options for octaves, frequency, amplitude, persistence, lacunarity, gradient falloff, falloff curve, and seed.
 - `src/utils/hydrology.js` — Flow direction, accumulation, and river extraction utilities (`computeFlowDirections`, `computeFlowAccumulation`, `extractRivers`).
 - `src/utils/biomes.js` — Biome assignment based on elevation and moisture (`assignBiomes`), with configurable thresholds and biome table.
-- `src/utils/render.js` — SVG rendering pipeline for map elements. Includes placeholder logic for contours, rivers, and biome fills. Requires a DOM environment (jsdom) for testing.
+- `src/utils/sea.js` — Sea mask generation (`generateSeaMask`) and smoothing (`smoothSeaMask`) utilities for coastline detection and cleanup.
+- `src/utils/render.js` — SVG rendering pipeline for map elements. Integrates coastline rendering using sea mask and smoothing (see options: `seaLevel`, `coastSmoothness`). Requires a DOM environment (jsdom) for testing.
 - `DEVLOG.md` — Development log tracking changes and decisions.
 
 ## Tests
@@ -30,6 +31,7 @@ npm test
 - `src/utils/heightmap.test.js` validates deterministic noise (using simplex-noise + seedrandom), normalization, and falloff.
 - `src/utils/hydrology.test.js` covers flow direction, accumulation, and river extraction.
 - `src/utils/biomes.test.js` covers biome assignment logic and threshold overrides.
+- `src/utils/sea.test.js` covers sea mask and smoothing logic.
 - `src/utils/render.test.js` covers SVG rendering logic (requires jsdom environment).
 
 ## Development
