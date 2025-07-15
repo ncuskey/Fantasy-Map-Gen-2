@@ -1,7 +1,7 @@
 # Fantasy Map Gen 2
 
 ## Overview
-A procedural fantasy map generator inspired by Perilous Shores. Generates terrain, hydrology, biomes, settlements, and renders in a hand-drawn SVG style.
+A procedural fantasy map generator inspired by Perilous Shores. Generates terrain, hydrology, biomes, settlements, roads, and renders in a hand-drawn SVG style.
 
 ## Installation
 ```bash
@@ -22,7 +22,8 @@ npm start
 - `src/utils/moisture.js` — Moisture map generation (`generateMoistureMap`) using multi-octave Simplex noise, with deterministic seeding and normalization.
 - `src/utils/sea.js` — Sea mask generation (`generateSeaMask`) and smoothing (`smoothSeaMask`) utilities for coastline detection and cleanup.
 - `src/utils/settlements.js` — Settlement placement using Poisson-disc sampling with elevation, biome, and spacing constraints (`generateSettlements`).
-- `src/utils/render.js` — SVG rendering pipeline for map elements. Integrates coastline rendering (see options: `seaLevel`, `coastSmoothness`), moisture map generation (`moisture`), settlement placement (`settlements`), and debug overlays for moisture (`debugMoisture`) and settlements (`debugSettlements`). Biomes now reflect the generated moisture field. Requires a DOM environment (jsdom) for testing.
+- `src/utils/roads.js` — Road network generation using MST, extra edges, and jitter (`generateRoads`).
+- `src/utils/render.js` — SVG rendering pipeline for map elements. Integrates coastline rendering (see options: `seaLevel`, `coastSmoothness`), moisture map generation (`moisture`), settlement placement (`settlements`), road network generation (`roads`), and debug overlays for moisture (`debugMoisture`), settlements (`debugSettlements`), and roads (`debugRoads`). Biomes now reflect the generated moisture field. Requires a DOM environment (jsdom) for testing.
 - `DEVLOG.md` — Development log tracking changes and decisions.
 
 ## Tests
@@ -36,6 +37,7 @@ npm test
 - `src/utils/moisture.test.js` covers moisture map generation and determinism.
 - `src/utils/sea.test.js` covers sea mask and smoothing logic.
 - `src/utils/settlements.test.js` covers settlement placement, spacing, and determinism.
+- `src/utils/roads.test.js` covers road network generation, MST, extra edges, jitter, and determinism.
 - `src/utils/render.test.js` covers SVG rendering logic (requires jsdom environment).
 
 ## Development
