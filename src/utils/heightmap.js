@@ -8,6 +8,8 @@ import { Perlin2 } from 'tumult';
  * @property {number} persistence - Amplitude multiplier per octave
  * @property {number} lacunarity - Frequency multiplier per octave
  * @property {'circular'|'none'} gradientFalloff - Type of gradient falloff to apply
+ * @property {number} [seed] - Optional seed for deterministic noise
+ * @property {'linear'|'smooth'|'power'} [falloffCurve] - Optional falloff curve for circular gradient
  */
 
 /**
@@ -26,9 +28,12 @@ export function generateHeightmap(width, height, options) {
     persistence = 0.5,
     lacunarity = 2.0,
     gradientFalloff = 'circular',
+    seed,
+    falloffCurve,
   } = options;
 
-  const noise = new Perlin2();
+  // Use seed if provided
+  const noise = seed !== undefined ? new Perlin2(seed) : new Perlin2();
   const map = Array.from({ length: height }, () => Array(width).fill(0));
 
   // Center for radial gradient
@@ -38,6 +43,9 @@ export function generateHeightmap(width, height, options) {
 
   let min = Infinity;
   let max = -Infinity;
+
+  // Default falloffCurve for circular gradient
+  const effectiveFalloffCurve = (gradientFalloff === 'circular') ? (falloffCurve || 'linear') : undefined;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -59,8 +67,24 @@ export function generateHeightmap(width, height, options) {
         const dx = x - cx;
         const dy = y - cy;
         const dist = Math.sqrt(dx * dx + dy * dy) / maxDist;
-        // Smooth falloff: 1 at center, 0 at edge
-        const falloff = 1 - dist;
+        let falloff = 1;
+        switch (effectiveFalloffCurve) {
+          case 'smooth': {
+            // smoothstep: 1 - (3t^2 - 2t^3)
+            const t = dist;
+            falloff = 1 - (3 * t * t - 2 * t * t * t);
+            break;
+          }
+          case 'power': {
+            falloff = Math.pow(1 - dist, 2);
+            break;
+          }
+          case 'linear':
+          default: {
+            falloff = 1 - dist;
+            break;
+          }
+        }
         value *= Math.max(0, falloff);
       }
 
