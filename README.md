@@ -16,7 +16,7 @@ npm start
 
 ## Project Structure
 
-- `src/utils/heightmap.js` — Heightmap generation with seeded noise and flexible falloff options
+- `src/utils/heightmap.js` — Heightmap generation with multi-octave simplex-noise and deterministic seeding via seedrandom
 - `src/utils/hydrology.js` — Flow direction, accumulation, and river extraction utilities (`computeFlowDirections`, `computeFlowAccumulation`, `extractRivers`)
 - `src/utils/biomes.js` — Biome assignment based on elevation and moisture
 - `src/utils/render.js` — SVG rendering pipeline for map elements
@@ -27,7 +27,7 @@ Run the Vitest suite with:
 ```bash
 npm test
 ```
-- `src/utils/heightmap.test.js` validates deterministic noise, normalization, and falloff.
+- `src/utils/heightmap.test.js` validates deterministic noise (using simplex-noise + seedrandom), normalization, and falloff.
 - `src/utils/hydrology.test.js` covers flow direction, accumulation, and river extraction.
 
 ## Contributing

@@ -1,4 +1,6 @@
-import SimplexNoise from 'simplex-noise';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { createNoise2D } = require('simplex-noise');
+const seedrandom = require('seedrandom');
 
 /**
  * @typedef {Object} HeightmapOptions
@@ -33,9 +35,8 @@ export function generateHeightmap(width, height, options) {
   } = options;
 
   // Use seed if provided
-  const noise = seed !== undefined
-    ? new SimplexNoise(seed.toString())
-    : new SimplexNoise();
+  const rng = seed !== undefined ? seedrandom(seed.toString()) : Math.random;
+  const noise2D = createNoise2D(rng);
   const map = Array.from({ length: height }, () => Array(width).fill(0));
 
   // Center for radial gradient
@@ -59,7 +60,7 @@ export function generateHeightmap(width, height, options) {
 
       // Multi-octave Simplex noise
       for (let o = 0; o < octaves; o++) {
-        value += noise.noise2D(nx * freq, ny * freq) * amp;
+        value += noise2D(nx * freq, ny * freq) * amp;
         amp *= persistence;
         freq *= lacunarity;
       }
