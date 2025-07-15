@@ -1,7 +1,7 @@
 # Fantasy Map Gen 2
 
 ## Overview
-A procedural fantasy map generator inspired by Perilous Shores. Generates terrain, hydrology, biomes, and renders in a hand-drawn SVG style.
+A procedural fantasy map generator inspired by Perilous Shores. Generates terrain, hydrology, biomes, settlements, and renders in a hand-drawn SVG style.
 
 ## Installation
 ```bash
@@ -21,7 +21,8 @@ npm start
 - `src/utils/biomes.js` — Biome assignment based on elevation and moisture (`assignBiomes`), with configurable thresholds and biome table.
 - `src/utils/moisture.js` — Moisture map generation (`generateMoistureMap`) using multi-octave Simplex noise, with deterministic seeding and normalization.
 - `src/utils/sea.js` — Sea mask generation (`generateSeaMask`) and smoothing (`smoothSeaMask`) utilities for coastline detection and cleanup.
-- `src/utils/render.js` — SVG rendering pipeline for map elements. Integrates coastline rendering using sea mask and smoothing (see options: `seaLevel`, `coastSmoothness`), and moisture map generation (see `moisture` options). Biomes now reflect the generated moisture field. Supports a debug overlay for moisture (`debugMoisture`). Requires a DOM environment (jsdom) for testing.
+- `src/utils/settlements.js` — Settlement placement using Poisson-disc sampling with elevation, biome, and spacing constraints (`generateSettlements`).
+- `src/utils/render.js` — SVG rendering pipeline for map elements. Integrates coastline rendering (see options: `seaLevel`, `coastSmoothness`), moisture map generation (`moisture`), settlement placement (`settlements`), and debug overlays for moisture (`debugMoisture`) and settlements (`debugSettlements`). Biomes now reflect the generated moisture field. Requires a DOM environment (jsdom) for testing.
 - `DEVLOG.md` — Development log tracking changes and decisions.
 
 ## Tests
@@ -34,6 +35,7 @@ npm test
 - `src/utils/biomes.test.js` covers biome assignment logic and threshold overrides.
 - `src/utils/moisture.test.js` covers moisture map generation and determinism.
 - `src/utils/sea.test.js` covers sea mask and smoothing logic.
+- `src/utils/settlements.test.js` covers settlement placement, spacing, and determinism.
 - `src/utils/render.test.js` covers SVG rendering logic (requires jsdom environment).
 
 ## Development

@@ -13,6 +13,7 @@ All entries in YYYY-MM-DD format.
 - **Render Module**: Created `src/utils/render.js` with JSDoc and placeholder logic for drawing contours, rivers, filling biomes, and rendering the map. Added minimal Vitest test suite (`render.test.js`) and set up jsdom environment for SVG testing.
 - **Coastline Integration**: Integrated `generateSeaMask` and `smoothSeaMask` from `src/utils/sea.js` into the render pipeline. Coastline rendering now uses `seaLevel` and `coastSmoothness` options to generate and smooth the sea mask before drawing coastline contours.
 - **Moisture Integration**: Integrated `generateMoistureMap` from `src/utils/moisture.js` into the render pipeline. Biome assignment now uses the generated moisture field, and a `debugMoisture` overlay option is available for visualizing the moisture map in the SVG output.
+- **Settlements Integration**: Integrated `generateSettlements` from `src/utils/settlements.js` into the render pipeline. Settlement placement now uses Poisson-disc sampling with elevation, biome, and spacing constraints, and a `debugSettlements` overlay option is available for visualizing settlements in the SVG output.
 - **Documentation**: Updated `README.md` to fully describe all modules, options, and test setup, including `render.js` and jsdom requirements. Confirmed all modules have JSDoc and inline documentation. Added a development section to the README. Maintenance and documentation work completed.
 
 <!-- Add future entries here as tasks progress --> 
