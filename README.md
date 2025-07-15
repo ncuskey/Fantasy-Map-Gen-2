@@ -17,7 +17,7 @@ npm start
 ## Project Structure
 
 - `src/utils/heightmap.js` — Heightmap generation with seeded noise and flexible falloff options
-- `src/utils/hydrology.js` — Flow direction, accumulation, and river extraction utilities
+- `src/utils/hydrology.js` — Flow direction, accumulation, and river extraction utilities (`computeFlowDirections`, `computeFlowAccumulation`, `extractRivers`)
 - `src/utils/biomes.js` — Biome assignment based on elevation and moisture
 - `src/utils/render.js` — SVG rendering pipeline for map elements
 - `DEVLOG.md` — Development log tracking changes and decisions
