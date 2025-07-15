@@ -22,6 +22,16 @@ npm start
 - `src/utils/render.js` — SVG rendering pipeline for map elements
 - `DEVLOG.md` — Development log tracking changes and decisions
 
+## Tests
+Run the Vitest suite with:
+```bash
+npm test
+```
+`src/utils/heightmap.test.js` validates deterministic noise, normalization, and falloff.
+// (And in future)
+
+`src/utils/hydrology.test.js` can cover flow‐direction and accumulation rules.
+
 ## Contributing
 
 Contributions welcome! Please submit pull requests and follow established coding conventions. 
