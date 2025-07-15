@@ -13,10 +13,17 @@
  */
 
 /**
+ * @typedef {Object} CoastlineOptions
+ * @property {number} [seaLevel] - Elevation threshold for sea (for coastline)
+ * @property {number} [coastSmoothness] - Number of smoothing iterations for coastline
+ */
+
+/**
  * @typedef {Object} RenderOptions
  * @property {ContourOptions} [contours]
  * @property {RiverRenderOptions} [rivers]
  * @property {Record<string,string>} [biomePalette]
+ * @property {CoastlineOptions} [coastline]
  */
 
 /**
@@ -54,10 +61,34 @@ export function fillBiomes(svg, biomes, palette) {
 }
 
 /**
+ * Draws a greyscale overlay for a 2D numeric map (e.g. moisture).
+ * @param {SVGElement} svg - The SVG element to append to
+ * @param {number[][]} map - 2D array of values in [0,1]
+ * @param {string} [className] - Optional CSS class
+ */
+function drawGreyscaleOverlay(svg, map, className = 'moisture-debug') {
+  const h = map.length;
+  const w = map[0].length;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const val = Math.round(map[y][x] * 255);
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', x);
+      rect.setAttribute('y', y);
+      rect.setAttribute('width', 1);
+      rect.setAttribute('height', 1);
+      rect.setAttribute('fill', `rgb(${val},${val},${val})`);
+      if (className) rect.setAttribute('class', className);
+      svg.appendChild(rect);
+    }
+  }
+}
+
+/**
  * Renders the full map into a container by ID, creating an SVG and calling the above functions.
  * @param {string} canvasId - The ID of the container element
- * @param {{heightmap: number[][], rivers: Array<Array<{x:number,y:number}>>, biomes: string[][]}} data - Map data
- * @param {RenderOptions} options - Rendering options for contours, rivers, and biomes
+ * @param {{heightmap: number[][], rivers: Array<Array<{x:number,y:number}>>, biomes?: string[][], moistureMap?: number[][]}} data - Map data
+ * @param {RenderOptions & {seaLevel?: number, coastSmoothness?: number, moisture?: object, debugMoisture?: boolean}} options - Rendering options for contours, rivers, biomes, coastline, and moisture
  */
 export function renderMap(canvasId, data, options) {
   // Create SVG element
@@ -68,8 +99,34 @@ export function renderMap(canvasId, data, options) {
   svg.setAttribute('width', data.heightmap[0].length);
   svg.setAttribute('height', data.heightmap.length);
   container.appendChild(svg);
+
+  // Generate moisture map if not provided
+  let moistureMap = data.moistureMap;
+  if (!moistureMap) {
+    moistureMap = generateMoistureMap(data.heightmap[0].length, data.heightmap.length, options.moisture);
+  }
+
+  // Assign biomes if not provided
+  let biomes = data.biomes;
+  if (!biomes && moistureMap) {
+    biomes = assignBiomes(data.heightmap, moistureMap, options.biomeOptions);
+  }
+
+  // Debug overlay for moisture
+  if (options.debugMoisture) {
+    drawGreyscaleOverlay(svg, moistureMap, 'moisture-debug');
+  }
+
   // Fill biomes
-  if (data.biomes && options.biomePalette) fillBiomes(svg, data.biomes, options.biomePalette);
+  if (biomes && options.biomePalette) fillBiomes(svg, biomes, options.biomePalette);
+  // Draw coastline if options provided
+  if (typeof options.seaLevel === 'number' && typeof options.coastSmoothness === 'number') {
+    const seaMask = generateSeaMask(data.heightmap, options.seaLevel);
+    const smoothMask = smoothSeaMask(seaMask, options.coastSmoothness);
+    // Convert boolean mask to numeric for contouring
+    const maskNumeric = smoothMask.map(row => row.map(v => v ? 1 : 0));
+    drawContours(svg, maskNumeric, { interval: 0.5, className: 'coastline' });
+  }
   // Draw contours
   if (data.heightmap && options.contours) drawContours(svg, data.heightmap, options.contours);
   // Draw rivers
