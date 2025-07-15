@@ -20,4 +20,13 @@ All entries in YYYY-MM-DD format.
 - **Labels Module**: Added `src/utils/labels.js` for SVG label placement for regions, towns, and rivers (`placeRegionLabels`, `placeTownLabels`, `placeRiverLabels`), with full DOM/JSDOM test coverage.
 - **Documentation**: Updated `README.md` to fully describe all modules, options, and test setup, including `render.js` and jsdom requirements. Confirmed all modules have JSDoc and inline documentation. Added a development section to the README. Maintenance and documentation work completed.
 
+### [YYYY-MM-DD] Added export utilities module
+- Created `src/utils/export.js` with:
+  - JSDoc typedef for `ExportData`.
+  - `exportMapAsSVG(svg)`: Serializes SVG to XML string.
+  - `exportMapAsPNG(svg, width, height)`: Converts SVG to PNG data URL.
+  - `exportMapData(data)`: Serializes map data to JSON.
+- All functions are pure and documented.
+- Added comprehensive Vitest tests in `src/utils/export.test.js` for SVG, JSON, and PNG export.
+
 <!-- Add future entries here as tasks progress --> 

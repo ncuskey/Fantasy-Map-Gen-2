@@ -26,6 +26,7 @@ npm start
 - `src/utils/regions.js` — Voronoi region assignment and centroid computation (`generateRegionMap`, `computeRegionCentroids`).
 - `src/utils/labels.js` — SVG label placement for regions, towns, and rivers (`placeRegionLabels`, `placeTownLabels`, `placeRiverLabels`). DOM/JSDOM focused, with full test coverage.
 - `src/utils/render.js` — SVG rendering pipeline for map elements. Exports `drawSettlements` and `drawRoads` with full rendering options and typedefs. Integrates coastline rendering (see options: `seaLevel`, `coastSmoothness`), moisture map generation (`moisture`), settlement placement (`settlements`), road network generation (`roads`), and debug overlays for moisture (`debugMoisture`), settlements (`debugSettlements`), and roads (`debugRoads`). Biomes now reflect the generated moisture field. Requires a DOM environment (jsdom) for testing.
+- `src/utils/export.js` — Export utilities for exporting map data and SVG renderings.
 - `DEVLOG.md` — Development log tracking changes and decisions.
 
 ## Tests
@@ -43,6 +44,7 @@ npm test
 - `src/utils/regions.test.js` covers Voronoi region assignment and centroid computation.
 - `src/utils/labels.test.js` covers SVG label placement for regions, towns, and rivers.
 - `src/utils/render.test.js` covers SVG rendering logic (requires jsdom environment).
+- `src/utils/export.test.js` covers SVG serialization, JSON round-trip, and PNG export.
 
 ## Development
 - All modules are ES6 and fully documented with JSDoc.
