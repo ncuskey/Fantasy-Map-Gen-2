@@ -16,11 +16,11 @@ npm start
 
 ## Project Structure
 
-- `src/utils/heightmap.js` — Heightmap generation with multi-octave simplex-noise and deterministic seeding via seedrandom
-- `src/utils/hydrology.js` — Flow direction, accumulation, and river extraction utilities (`computeFlowDirections`, `computeFlowAccumulation`, `extractRivers`)
-- `src/utils/biomes.js` — Biome assignment based on elevation and moisture (`assignBiomes`)
-- `src/utils/render.js` — SVG rendering pipeline for map elements
-- `DEVLOG.md` — Development log tracking changes and decisions
+- `src/utils/heightmap.js` — Heightmap generation with multi-octave simplex-noise and deterministic seeding via seedrandom. Supports options for octaves, frequency, amplitude, persistence, lacunarity, gradient falloff, falloff curve, and seed.
+- `src/utils/hydrology.js` — Flow direction, accumulation, and river extraction utilities (`computeFlowDirections`, `computeFlowAccumulation`, `extractRivers`).
+- `src/utils/biomes.js` — Biome assignment based on elevation and moisture (`assignBiomes`), with configurable thresholds and biome table.
+- `src/utils/render.js` — SVG rendering pipeline for map elements. Includes placeholder logic for contours, rivers, and biome fills. Requires a DOM environment (jsdom) for testing.
+- `DEVLOG.md` — Development log tracking changes and decisions.
 
 ## Tests
 Run the Vitest suite with:
@@ -30,6 +30,12 @@ npm test
 - `src/utils/heightmap.test.js` validates deterministic noise (using simplex-noise + seedrandom), normalization, and falloff.
 - `src/utils/hydrology.test.js` covers flow direction, accumulation, and river extraction.
 - `src/utils/biomes.test.js` covers biome assignment logic and threshold overrides.
+- `src/utils/render.test.js` covers SVG rendering logic (requires jsdom environment).
+
+## Development
+- All modules are ES6 and fully documented with JSDoc.
+- Tests use [Vitest](https://vitest.dev/) and [jsdom](https://github.com/jsdom/jsdom) for DOM emulation.
+- To add features, update the relevant module and its test file, then document changes in `DEVLOG.md` and `README.md`.
 
 ## Contributing
 
