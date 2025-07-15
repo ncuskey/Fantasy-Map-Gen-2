@@ -36,4 +36,16 @@ All entries in YYYY-MM-DD format.
 - Added CSS for layout and styling in `frontend/src/index.css`.
 - App is started with `npm run dev` from the `frontend` directory.
 
+### [YYYY-MM-DD] Added Cypress E2E testing
+- Installed Cypress as dev dependency in frontend.
+- Created `frontend/cypress/e2e/mapgen.cy.js` with tests for:
+  - Initial SVG render
+  - Sea level slider interaction and map updates
+  - Export button functionality (SVG, PNG, JSON).
+- Configured `frontend/cypress.config.js` with 20-second default command timeout.
+- Added Cypress detection in `App.jsx` to use smaller maps (100×100) during testing.
+- Converted dynamic imports to static imports in `App.jsx` for reliable React reactivity.
+- Fixed sea level slider to properly pass `oceanLevel` to biome assignment.
+- Optimized test performance with reduced smoothing iterations under Cypress.
+
 <!-- Add future entries here as tasks progress --> 

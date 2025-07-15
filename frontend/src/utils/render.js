@@ -161,20 +161,40 @@ export function drawRoads(svg, roads, options = {}) {
 }
 
 /**
- * Renders the full map into a container by ID, creating an SVG and calling the above functions.
- * @param {string} canvasId - The ID of the container element
- * @param {{heightmap: number[][], rivers: Array<Array<{x:number,y:number}>>, biomes?: string[][], moistureMap?: number[][], settlements?: Array<{x:number,y:number}>, roads?: Array<{path: Array<{x:number,y:number}>}>}} data - Map data
- * @param {RenderOptions & {seaLevel?: number, coastSmoothness?: number, moisture?: object, debugMoisture?: boolean, settlements?: object, debugSettlements?: boolean, roads?: object, debugRoads?: boolean}} options - Rendering options for contours, rivers, biomes, coastline, moisture, settlements, and roads
+ * Renders the full map into a container or SVG element.
+ * @param {string|HTMLElement|SVGElement} target - ID of a container, a container element, or an existing SVG element
+ * @param {Object} data - Map data (heightmap, rivers, biomes, etc.)
+ * @param {RenderOptions & {...}} options - Rendering options
  */
-export function renderMap(canvasId, data, options) {
-  // Create SVG element
-  const container = document.getElementById(canvasId);
-  if (!container) throw new Error('Container not found');
-  container.innerHTML = '';
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('width', data.heightmap[0].length);
-  svg.setAttribute('height', data.heightmap.length);
-  container.appendChild(svg);
+export function renderMap(target, data, options) {
+  let svg;
+  // If string, treat as container ID
+  if (typeof target === 'string') {
+    const container = document.getElementById(target);
+    if (!container) throw new Error('Container not found');
+    container.innerHTML = '';
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', String(data.heightmap[0].length));
+    svg.setAttribute('height', String(data.heightmap.length));
+    container.appendChild(svg);
+  }
+  // If SVG element, clear it and reuse
+  else if (target instanceof SVGElement) {
+    svg = target;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+  }
+  // If generic container element, create a new SVG inside it
+  else if (target instanceof HTMLElement) {
+    const container = target;
+    container.innerHTML = '';
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', String(data.heightmap[0].length));
+    svg.setAttribute('height', String(data.heightmap.length));
+    container.appendChild(svg);
+  }
+  else {
+    throw new Error('Container not found');
+  }
 
   // Generate moisture map if not provided
   let moistureMap = data.moistureMap;

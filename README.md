@@ -85,3 +85,42 @@ The frontend is a Vite-powered React app for interactive procedural map generati
 - All map generation logic is shared between backend and frontend via ES6 modules.
 - The UI is modular and extensible, with all generator parameters exposed for live tweaking.
 - Export options use the same tested logic as the backend. 
+
+### E2E Testing with Cypress
+
+The frontend includes comprehensive end-to-end tests using Cypress to verify the UI functionality.
+
+#### Test Coverage
+
+- **Initial Render**: Verifies the SVG map loads correctly
+- **Interactive Controls**: Tests that changing the sea level slider updates the map
+- **Export Functionality**: Validates SVG, PNG, and JSON export buttons work
+
+#### Test Configuration
+
+- **Timeout**: 20-second default command timeout for map generation
+- **Cypress Detection**: Automatically reduces map size to 100×100 during testing (vs 500×500 in production)
+- **Test File**: `frontend/cypress/e2e/mapgen.cy.js`
+
+#### Running Tests
+
+1. Start the frontend dev server:
+   ```sh
+   cd frontend
+   npm run dev
+   ```
+
+2. In another terminal, run Cypress:
+   ```sh
+   cd frontend
+   npx cypress open
+   ```
+
+3. Select "E2E Testing" and choose your browser
+4. Click on `mapgen.cy.js` to run the tests
+
+#### Test Optimizations
+
+- **Smaller Maps**: Tests use 100×100 maps instead of 500×500 for faster execution
+- **Reduced Smoothing**: Fewer iterations during testing to improve performance
+- **Event Handling**: Proper `input` and `change` event triggering for React range sliders 

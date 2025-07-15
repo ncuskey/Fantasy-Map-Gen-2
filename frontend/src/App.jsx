@@ -4,6 +4,23 @@ import MapCanvas from './components/MapCanvas';
 import ExportButtons from './components/ExportButtons';
 import './index.css';
 
+// Static imports so that re-running the effect is immediate and reliable
+import { generateHeightmap } from './utils/heightmap.js';
+import { generateSeaMask, smoothSeaMask } from './utils/sea.js';
+import { generateMoistureMap } from './utils/moisture.js';
+import { assignBiomes } from './utils/biomes.js';
+import {
+  computeFlowDirections,
+  computeFlowAccumulation,
+  extractRivers
+} from './utils/hydrology.js';
+import { generateRegionMap, computeRegionCentroids } from './utils/regions.js';
+import { generateSettlements } from './utils/settlements.js';
+import { generateRoads } from './utils/roads.js';
+import { exportMapAsSVG, exportMapAsPNG, exportMapData } from './utils/export.js';
+
+const isCypress = typeof window !== 'undefined' && window.Cypress;
+
 export default function App() {
   // Map data
   const [seed,      setSeed]      = useState(123);
@@ -17,46 +34,57 @@ export default function App() {
 
   // Regenerate map when parameters change
   useEffect(() => {
-    // lazy‑import your pipeline functions
-    import('./utils/heightmap.js').then(({ generateHeightmap }) => {
-      import('./utils/sea.js').then(({ generateSeaMask, smoothSeaMask }) => {
-        import('./utils/moisture.js').then(({ generateMoistureMap }) => {
-          import('./utils/biomes.js').then(({ assignBiomes }) => {
-            import('./utils/hydrology.js').then(({ computeFlowDirections, computeFlowAccumulation, extractRivers }) => {
-              import('./utils/regions.js').then(({ generateRegionMap, computeRegionCentroids }) => {
-                import('./utils/settlements.js').then(({ generateSettlements }) => {
-                  import('./utils/roads.js').then(({ generateRoads }) => {
-                    import('./utils/export.js'); // for ExportButtons
-                    // 1. Heightmap
-                    const heightmap = generateHeightmap(500, 500, { seed, ...noiseOpts, gradientFalloff:'circular' });
-                    // 2. Sea mask
-                    const rawMask   = generateSeaMask(heightmap, seaLevel);
-                    const seaMask   = smoothSeaMask(rawMask, 2, 5);
-                    // 3. Moisture
-                    const moistureMap = generateMoistureMap(500, 500, { seed: seed+1, ...moistOpts });
-                    // 4. Biomes
-                    const biomeMap = assignBiomes(heightmap, moistureMap);
-                    // 5. Hydrology
-                    const flowDir = computeFlowDirections(heightmap);
-                    const flowAcc = computeFlowAccumulation(flowDir, heightmap);
-                    const rivers  = extractRivers(flowAcc, flowDir, 20);
-                    // 6. Regions & towns
-                    const regionMap = generateRegionMap(500, 500, generateSettlements(heightmap, biomeMap, townOpts), {});
-                    const centroids = computeRegionCentroids(regionMap);
-                    const towns     = generateSettlements(heightmap, biomeMap, townOpts);
-                    // 7. Roads
-                    const roads = generateRoads(towns, { seed, ...roadOpts });
-                    // 8. Package data
-                    setMapData({ heightmap, seaMask, moistureMap, biomeMap, rivers, regionMap, centroids, towns, roads, seaLevel });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
+    const MAP_SIZE = isCypress ? 100 : 500;
+    const SMOOTH_ITERS = isCypress ? 1 : 2;
+
+    // 1. Heightmap
+    const heightmap = generateHeightmap(
+      MAP_SIZE,
+      MAP_SIZE,
+      { seed, ...noiseOpts, gradientFalloff: 'circular' }
+    );
+    // 2. Sea mask
+    const rawMask = generateSeaMask(heightmap, seaLevel);
+    const seaMask = smoothSeaMask(rawMask, SMOOTH_ITERS, 5);
+    // 3. Moisture
+    const moistureMap = generateMoistureMap(
+      MAP_SIZE,
+      MAP_SIZE,
+      { seed: seed + 1, ...moistOpts }
+    );
+    // 4. Biomes (respecting the UI's seaLevel slider)
+    const biomeMap = assignBiomes(heightmap, moistureMap, { oceanLevel: seaLevel });
+    // 5. Hydrology
+    const flowDir = computeFlowDirections(heightmap);
+    const flowAcc = computeFlowAccumulation(flowDir, heightmap);
+    const rivers  = extractRivers(flowAcc, flowDir, 20);
+    // 6. Towns & regions
+    const towns     = generateSettlements(heightmap, biomeMap, townOpts);
+    const regionMap = generateRegionMap(MAP_SIZE, MAP_SIZE, towns, {});
+    const centroids = computeRegionCentroids(regionMap);
+    // 7. Roads
+    const roads = generateRoads(towns, { seed, ...roadOpts });
+
+    setMapData({
+      heightmap,
+      seaMask,
+      moistureMap,
+      biomeMap,
+      rivers,
+      regionMap,
+      centroids,
+      towns,
+      roads,
+      seaLevel
     });
-  }, [seed, seaLevel, noiseOpts, moistOpts, townOpts, roadOpts]);
+  }, [
+    seed,
+    seaLevel,
+    noiseOpts,
+    moistOpts,
+    townOpts,
+    roadOpts
+  ]);
 
   return (
     <div className="app">

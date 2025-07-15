@@ -1,6 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { createNoise2D } = require('simplex-noise');
-const seedrandom = require('seedrandom');
+import { createNoise2D } from 'simplex-noise';
+import seedrandom from 'seedrandom';
 
 /**
  * @typedef {Object} HeightmapOptions
