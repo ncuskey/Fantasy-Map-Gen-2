@@ -11,7 +11,7 @@ export default function MapCanvas({ data }) {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     // call your renderMap:
     renderMap(svg, data, {
-      contour:    { interval: 0.1, className: 'contour' },
+      contour:    { interval: 0.2, className: 'contour' },
       river:      { strokeWidth: 2, strokeColor: '#00f' },
       biome:      { palette: {/*...*/} },
       roadRender: { strokeWidth: 2, strokeColor: '#888' },
@@ -24,7 +24,7 @@ export default function MapCanvas({ data }) {
 
   return (
     <div className="map-container">
-      <svg id="map-svg" ref={svgRef} width={500} height={500} />
+      <svg id="map-svg" ref={svgRef} width={100} height={100} />
     </div>
   );
 } 

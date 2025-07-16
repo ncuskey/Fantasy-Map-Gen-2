@@ -35,7 +35,7 @@ export default function App() {
   // Regenerate map when parameters change
   useEffect(() => {
     console.log('🔄 useEffect seaLevel →', seaLevel);
-    const MAP_SIZE = isCypress ? 100 : 500;
+    const MAP_SIZE = isCypress ? 100 : 100;
     const SMOOTH_ITERS = isCypress ? 1 : 2;
 
     // 1. Heightmap
