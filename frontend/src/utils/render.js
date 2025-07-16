@@ -63,21 +63,48 @@ export function drawContours(svg, heightmap, options) {
   const minVal = Math.min(...heightmap.flat());
   const maxVal = Math.max(...heightmap.flat());
   
-  let allSegments = [];
-  for (let level = minVal; level <= maxVal; level += options.interval) {
-    const segments = generateSegments(heightmap, level);
-    allSegments = allSegments.concat(segments);
-  }
-  console.log('🔍 drawContours: segments.length =', allSegments.length);
+  // Limit the number of contour levels to prevent performance issues
+  const maxLevels = 10; // Maximum number of contour levels to generate
+  const totalLevels = Math.floor((maxVal - minVal) / options.interval) + 1;
+  
+  if (totalLevels > maxLevels) {
+    console.warn(`⚠️ drawContours: Too many contour levels (${totalLevels}), limiting to ${maxLevels}`);
+    // Adjust interval to fit within maxLevels
+    const adjustedInterval = (maxVal - minVal) / (maxLevels - 1);
+    console.log(`🔍 drawContours: Using adjusted interval=${adjustedInterval}`);
+    
+    let allSegments = [];
+    for (let i = 0; i < maxLevels; i++) {
+      const level = minVal + (i * adjustedInterval);
+      const segments = generateSegments(heightmap, level);
+      allSegments = allSegments.concat(segments);
+    }
+    console.log('🔍 drawContours: segments.length =', allSegments.length);
 
-  allSegments.forEach((seg, i) => {
-    const d = segToPathD(seg);
-    console.log(`✏️ drawContours: appending path #${i}`, d);
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d', d);
-    path.setAttribute('class', options.className || '');
-    svg.appendChild(path);
-  });
+    allSegments.forEach((seg, i) => {
+      const d = segToPathD(seg);
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', d);
+      path.setAttribute('class', options.className || '');
+      svg.appendChild(path);
+    });
+  } else {
+    // Original logic for reasonable number of levels
+    let allSegments = [];
+    for (let level = minVal; level <= maxVal; level += options.interval) {
+      const segments = generateSegments(heightmap, level);
+      allSegments = allSegments.concat(segments);
+    }
+    console.log('🔍 drawContours: segments.length =', allSegments.length);
+
+    allSegments.forEach((seg, i) => {
+      const d = segToPathD(seg);
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', d);
+      path.setAttribute('class', options.className || '');
+      svg.appendChild(path);
+    });
+  }
 }
 
 /**

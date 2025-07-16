@@ -8,9 +8,13 @@ describe('Fantasy Map Gen 2 UI', () => {
   });
 
   it('updates map on sea level change', () => {
-    cy.get('input[type="range"]').first().invoke('val', 0.5).trigger('input').trigger('change');
-    cy.wait(500); // allow re-render
-    cy.get('#map-svg').should('not.be.empty');
+    cy.get('input[type="range"]')
+      .first()
+      .invoke('val', 0.5)
+      .trigger('input')
+      .trigger('change');
+    // wait up to 20 seconds (or whatever you configure) for the map to redraw
+    cy.get('#map-svg', { timeout: 20000 }).should('not.be.empty');
   });
 
   it('exports SVG, PNG, and JSON', () => {

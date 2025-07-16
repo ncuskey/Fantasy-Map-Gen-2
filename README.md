@@ -1,127 +1,199 @@
 # Fantasy Map Gen 2
 
-## Overview
-A procedural fantasy map generator inspired by Perilous Shores. Generates terrain, hydrology, biomes, settlements, roads, and renders in a hand-drawn SVG style.
+A modular, test-driven procedural map generator built with modern JavaScript/ES6. This system generates fantasy maps with realistic terrain, hydrology, biomes, settlements, and road networks.
+
+## Features
+
+### Core Map Generation
+- **Heightmap Generation**: Perlin noise-based elevation with configurable parameters
+- **Hydrology System**: River networks, watershed analysis, and flow accumulation
+- **Biome Assignment**: Climate and elevation-based biome mapping
+- **Contour Rendering**: Marching squares algorithm for smooth contour lines
+- **Sea Level Integration**: Dynamic coastline and island generation
+
+### Advanced Features
+- **Settlement Placement**: Poisson-disc sampling with elevation and biome constraints
+- **Road Networks**: Minimum spanning tree with additional connections and jitter
+- **Region Mapping**: Voronoi-based political and cultural boundaries
+- **Label Placement**: Geographic feature labeling for regions, towns, and rivers
+- **Export Functionality**: SVG and PNG export with data serialization
+
+### Frontend Interface
+- **Interactive Controls**: Real-time parameter adjustment
+- **Live Preview**: Instant map regeneration on parameter changes
+- **Export Options**: Multiple export formats with custom settings
+- **Responsive Design**: Modern UI with professional styling
+
+## Performance Optimizations
+
+### Contour Rendering
+- **Safety Limits**: Maximum 10,000 cells processed for full detail
+- **Smart Sampling**: Automatic cell sampling for large grids (500x500+)
+- **Level Limiting**: Maximum 10 contour levels to prevent performance issues
+- **Dynamic Intervals**: Automatic interval adjustment for optimal detail
+
+### Testing Optimizations
+- **Cypress Detection**: Reduced map sizes during automated testing
+- **Fast Execution**: 100x100 test maps with minimal smoothing iterations
+- **Reliable Results**: Deterministic outputs for consistent test results
 
 ## Installation
+
+### Backend Setup
 ```bash
 npm install
+npm test  # Run all tests
+```
+
+### Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev  # Start development server
+npm run test:e2e  # Run Cypress tests
 ```
 
 ## Usage
-```bash
-npm run build
-npm start
+
+### Backend API
+
+```javascript
+import { generateHeightmap } from './src/utils/heightmap.js';
+import { generateRivers } from './src/utils/hydrology.js';
+import { assignBiomes } from './src/utils/biomes.js';
+import { renderMap } from './src/utils/render.js';
+
+// Generate map data
+const heightmap = generateHeightmap(500, 500, { octaves: 4, persistence: 0.5 });
+const rivers = generateRivers(heightmap);
+const biomes = assignBiomes(heightmap, moistureMap, { seaLevel: 0.3 });
+
+// Render to SVG
+renderMap('map-container', { heightmap, rivers, biomes }, {
+  contours: { interval: 0.1, className: 'contour-line' },
+  rivers: { stroke: '#0066cc', strokeWidth: 2 },
+  biomePalette: { 'forest': '#228b22', 'desert': '#f4a460' }
+});
 ```
 
-## Project Structure
+### Frontend Integration
 
-- `src/utils/heightmap.js` — Heightmap generation with multi-octave simplex-noise and deterministic seeding via seedrandom. Supports options for octaves, frequency, amplitude, persistence, lacunarity, gradient falloff, falloff curve, and seed.
-- `src/utils/hydrology.js` — Flow direction, accumulation, and river extraction utilities (`computeFlowDirections`, `computeFlowAccumulation`, `extractRivers`).
-- `src/utils/biomes.js` — Biome assignment based on elevation and moisture (`assignBiomes`), with configurable thresholds and biome table.
-- `src/utils/moisture.js` — Moisture map generation (`generateMoistureMap`) using multi-octave Simplex noise, with deterministic seeding and normalization.
-- `src/utils/sea.js` — Sea mask generation (`generateSeaMask`) and smoothing (`smoothSeaMask`) utilities for coastline detection and cleanup.
-- `src/utils/settlements.js` — Settlement placement using Poisson-disc sampling with elevation, biome, and spacing constraints (`generateSettlements`).
-- `src/utils/roads.js` — Road network generation using MST, extra edges, and jitter (`generateRoads`).
-- `src/utils/regions.js` — Voronoi region assignment and centroid computation (`generateRegionMap`, `computeRegionCentroids`).
-- `src/utils/labels.js` — SVG label placement for regions, towns, and rivers (`placeRegionLabels`, `placeTownLabels`, `placeRiverLabels`). DOM/JSDOM focused, with full test coverage.
-- `src/utils/render.js` — SVG rendering pipeline for map elements. Exports `drawSettlements` and `drawRoads` with full rendering options and typedefs. Integrates coastline rendering (see options: `seaLevel`, `coastSmoothness`), moisture map generation (`moisture`), settlement placement (`settlements`), road network generation (`roads`), and debug overlays for moisture (`debugMoisture`), settlements (`debugSettlements`), and roads (`debugRoads`). Biomes now reflect the generated moisture field. Requires a DOM environment (jsdom) for testing.
-- `src/utils/export.js` — Export utilities for exporting map data and SVG renderings.
-- `src/utils/contours.js` — Marching squares implementation for generating contour lines from 2D elevation grids. Exports `generateSegments(field, level)` and `segToPathD(segment)` for SVG path conversion. Currently contains a stub implementation for testing. Available in both frontend and backend utils directories.
-- `DEVLOG.md` — Development log tracking changes and decisions.
+```javascript
+// React component with live updates
+const [seaLevel, setSeaLevel] = useState(0.3);
+const [mapData, setMapData] = useState(null);
 
-## Tests
-Run the Vitest suite with:
-```bash
-npm test
+useEffect(() => {
+  const data = generateMapData({ seaLevel });
+  setMapData(data);
+}, [seaLevel]);
+
+// Render with parameter controls
+<ControlPanel seaLevel={seaLevel} onSeaLevelChange={setSeaLevel} />
+<MapCanvas data={mapData} />
+<ExportButtons data={mapData} />
 ```
-- `src/utils/heightmap.test.js` validates deterministic noise (using simplex-noise + seedrandom), normalization, and falloff.
-- `src/utils/hydrology.test.js` covers flow direction, accumulation, and river extraction.
-- `src/utils/biomes.test.js` covers biome assignment logic and threshold overrides.
-- `src/utils/moisture.test.js` covers moisture map generation and determinism.
-- `src/utils/sea.test.js` covers sea mask and smoothing logic.
-- `src/utils/settlements.test.js` covers settlement placement, spacing, and determinism.
-- `src/utils/roads.test.js` covers road network generation, MST, extra edges, jitter, and determinism.
-- `src/utils/regions.test.js` covers Voronoi region assignment and centroid computation.
-- `src/utils/labels.test.js` covers SVG label placement for regions, towns, and rivers.
-- `src/utils/render.test.js` covers SVG rendering logic (requires jsdom environment).
-- `src/utils/export.test.js` covers SVG serialization, JSON round-trip, and PNG export.
+
+## Architecture
+
+### Module Structure
+```
+src/utils/
+├── heightmap.js      # Elevation generation
+├── hydrology.js      # River networks and flow
+├── biomes.js         # Climate and biome assignment
+├── contours.js       # Marching squares contour generation
+├── render.js         # SVG rendering pipeline
+├── settlements.js    # Town and city placement
+├── roads.js          # Transportation networks
+├── regions.js        # Political boundaries
+├── labels.js         # Geographic labeling
+└── export.js         # Export utilities
+```
+
+### Frontend Structure
+```
+frontend/
+├── src/
+│   ├── App.jsx           # Main application component
+│   ├── ControlPanel.jsx  # Parameter controls
+│   ├── MapCanvas.jsx     # SVG rendering container
+│   ├── ExportButtons.jsx # Export functionality
+│   └── utils/            # Backend utilities (copied)
+├── cypress/              # E2E test suite
+└── public/               # Static assets
+```
+
+## Testing
+
+### Backend Tests
+- **Vitest Framework**: Fast, modern testing with full coverage
+- **Deterministic Results**: Consistent outputs for reliable testing
+- **Module Isolation**: Each utility tested independently
+- **JSDoc Validation**: Documentation accuracy verification
+
+### Frontend Tests
+- **Cypress E2E**: Comprehensive UI interaction testing
+- **Performance Optimized**: Reduced map sizes for fast execution
+- **Export Validation**: SVG, PNG, and JSON export testing
+- **Parameter Interaction**: Real-time control testing
 
 ## Development
-- All modules are ES6 and fully documented with JSDoc.
-- Tests use [Vitest](https://vitest.dev/) and [jsdom](https://github.com/jsdom/jsdom) for DOM emulation.
-- To add features, update the relevant module and its test file, then document changes in `DEVLOG.md` and `README.md`.
+
+### Adding New Features
+1. Create module in `src/utils/`
+2. Add comprehensive JSDoc documentation
+3. Implement Vitest test suite
+4. Update README and DEVLOG
+5. Copy to frontend if needed
+
+### Performance Guidelines
+- **Large Grids**: Use sampling for grids > 10,000 cells
+- **Contour Levels**: Limit to 10 levels maximum
+- **Memory Management**: Avoid excessive array concatenation
+- **Testing**: Use smaller maps during development
+
+### Code Quality
+- **ES6 Modules**: Use import/export syntax
+- **JSDoc Comments**: Document all public functions
+- **Type Definitions**: Include typedefs for complex objects
+- **Error Handling**: Provide meaningful error messages
+
+## Export Options
+
+### SVG Export
+- **Vector Graphics**: Scalable, editable output
+- **Layer Support**: Separate layers for different map elements
+- **Style Preservation**: CSS classes and inline styles maintained
+
+### PNG Export
+- **Raster Graphics**: High-resolution bitmap output
+- **Custom Sizes**: Configurable width and height
+- **Background Support**: Transparent or colored backgrounds
+
+### Data Export
+- **JSON Serialization**: Complete map data preservation
+- **Metadata Inclusion**: Generation parameters and timestamps
+- **Compression**: Optional data compression for large maps
+
+## License
+
+MIT License - see LICENSE file for details.
 
 ## Contributing
 
-Contributions welcome! Please submit pull requests and follow established coding conventions. 
+1. Fork the repository
+2. Create feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Update documentation
+6. Submit pull request
 
-## Frontend React App (`frontend/`)
+## Roadmap
 
-The frontend is a Vite-powered React app for interactive procedural map generation and export.
-
-### Project Structure
-
-- `frontend/src/App.jsx` — Main app, manages generator state and ties together all components.
-- `frontend/src/components/ControlPanel.jsx` — UI for adjusting map generation parameters (seed, sea level, noise, towns, roads, etc.).
-- `frontend/src/components/MapCanvas.jsx` — Renders the SVG map using the backend's renderMap utility.
-- `frontend/src/components/ExportButtons.jsx` — Provides buttons to export the map as SVG, PNG, or JSON using the shared export utilities.
-- `frontend/src/utils/` — Contains all backend utility modules (copied from `src/utils/`), reused directly in the browser.
-- `frontend/src/index.css` — CSS for layout and styling (flexbox, sidebar, map container, export buttons).
-
-### Usage
-
-1. Install dependencies:
-   ```sh
-   cd frontend
-   npm install
-   ```
-2. Start the dev server:
-   ```sh
-   npm run dev
-   ```
-3. Open the local dev URL (usually http://localhost:5173) to use the app.
-
-### Notes
-- All map generation logic is shared between backend and frontend via ES6 modules.
-- The UI is modular and extensible, with all generator parameters exposed for live tweaking.
-- Export options use the same tested logic as the backend. 
-
-### E2E Testing with Cypress
-
-The frontend includes comprehensive end-to-end tests using Cypress to verify the UI functionality.
-
-#### Test Coverage
-
-- **Initial Render**: Verifies the SVG map loads correctly
-- **Interactive Controls**: Tests that changing the sea level slider updates the map
-- **Export Functionality**: Validates SVG, PNG, and JSON export buttons work
-
-#### Test Configuration
-
-- **Timeout**: 20-second default command timeout for map generation
-- **Cypress Detection**: Automatically reduces map size to 100×100 during testing (vs 500×500 in production)
-- **Test File**: `frontend/cypress/e2e/mapgen.cy.js`
-
-#### Running Tests
-
-1. Start the frontend dev server:
-   ```sh
-   cd frontend
-   npm run dev
-   ```
-
-2. In another terminal, run Cypress:
-   ```sh
-   cd frontend
-   npx cypress open
-   ```
-
-3. Select "E2E Testing" and choose your browser
-4. Click on `mapgen.cy.js` to run the tests
-
-#### Test Optimizations
-
-- **Smaller Maps**: Tests use 100×100 maps instead of 500×500 for faster execution
-- **Reduced Smoothing**: Fewer iterations during testing to improve performance
-- **Event Handling**: Proper `input` and `change` event triggering for React range sliders 
+- [ ] Advanced climate simulation
+- [ ] Cultural region generation
+- [ ] Historical map styles
+- [ ] 3D terrain visualization
+- [ ] Multi-language support
+- [ ] Plugin architecture 

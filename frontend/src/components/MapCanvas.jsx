@@ -5,18 +5,20 @@ export default function MapCanvas({ data }) {
   const svgRef = useRef();
 
   useEffect(() => {
+    console.log('🏗️  Calling renderMap with svgRef:', svgRef.current, 'data:', data);
     const svg = svgRef.current;
     // clear old content
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     // call your renderMap:
     renderMap(svg, data, {
-      sea: { seaLevel: data.seaLevel, coastSmoothness: 2 },
-      contour: { interval: 0.1, className: 'contour' },
-      river: { strokeColor: '#00f', strokeWidth: 2 },
-      biome: { palette: {/*...*/} },
-      roadRender: { strokeColor: '#888', strokeWidth: 2 },
+      contour:    { interval: 0.1, className: 'contour' },
+      river:      { strokeWidth: 2, strokeColor: '#00f' },
+      biome:      { palette: {/*...*/} },
+      roadRender: { strokeWidth: 2, strokeColor: '#888' },
       settlementRender: { symbolSize: 4, fillColor: '#fff' },
-      label: { font: '10px serif', fillColor: '#000' },
+      label:      { font: '10px serif', fillColor: '#000' },
+      // note: no top-level `sea` here—seaMask is already baked into data,
+      // so you don't need options.sea for drawing.
     });
   }, [data]);
 

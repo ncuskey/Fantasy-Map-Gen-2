@@ -3,6 +3,7 @@ import { assignBiomes } from './biomes.js';
 import { generateSeaMask, smoothSeaMask } from './sea.js';
 import { generateSettlements } from './settlements.js';
 import { generateRoads } from './roads.js';
+import { generateSegments, segToPathD } from './contours.js';
 
 /**
  * @typedef {Object} ContourOptions
@@ -54,9 +55,16 @@ import { generateRoads } from './roads.js';
  * @param {ContourOptions} options - Contour interval and styling
  */
 export function drawContours(svg, heightmap, options) {
-  // Placeholder: Implement Marching Squares for contours
-  // For each contour level, generate paths and append to svg
-  // Example: svg.appendChild(pathEl)
+  console.log('🔍 drawContours: size=', heightmap.length, '×', heightmap[0].length, 'interval=', options.interval);
+  const segments = generateSegments(heightmap, options.interval);
+  console.log('🔍 drawContours: segments.length =', segments.length);
+  segments.forEach((seg, i) => {
+    const d = segToPathD(seg);
+    const pathEl = document.createElementNS('http://www.w3.org/2000/svg','path');
+    pathEl.setAttribute('d', d);
+    pathEl.setAttribute('class', options.className || '');
+    svg.appendChild(pathEl);
+  });
 }
 
 /**
@@ -230,7 +238,10 @@ export function renderMap(canvasId, data, options) {
     drawContours(svg, maskNumeric, { interval: 0.5, className: 'coastline' });
   }
   // Draw contours
-  if (data.heightmap && options.contours) drawContours(svg, data.heightmap, options.contours);
+  if (data.heightmap && (options.contours || options.contour)) {
+    const contourOptions = options.contours || options.contour;
+    drawContours(svg, data.heightmap, contourOptions);
+  }
   // Draw rivers
   if (data.rivers && options.rivers) drawRivers(svg, data.rivers, options.rivers);
   // Draw roads and settlements overlays
