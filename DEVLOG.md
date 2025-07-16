@@ -48,4 +48,11 @@ All entries in YYYY-MM-DD format.
 - Fixed sea level slider to properly pass `oceanLevel` to biome assignment.
 - Optimized test performance with reduced smoothing iterations under Cypress.
 
+### [YYYY-MM-DD] Implemented marching squares contour generation
+- Created `src/utils/contours.js` with marching squares algorithm for generating contour lines.
+- Exports `generateSegments(field, level)` for segment generation and `segToPathD(segment)` for SVG path conversion.
+- Refactored `src/utils/render.js` to import contour functions and removed duplicate inline implementations.
+- Enhanced `drawContours` function with comprehensive logging for debugging contour generation.
+- Contour system now generates multiple contour levels across the heightmap range with proper SVG path creation.
+
 <!-- Add future entries here as tasks progress --> 

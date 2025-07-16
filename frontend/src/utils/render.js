@@ -3,6 +3,7 @@ import { assignBiomes } from './biomes.js';
 import { generateSeaMask, smoothSeaMask } from './sea.js';
 import { generateSettlements } from './settlements.js';
 import { generateRoads } from './roads.js';
+import { generateSegments, segToPathD } from './contours.js';
 
 /**
  * @typedef {Object} ContourOptions
@@ -47,6 +48,8 @@ import { generateRoads } from './roads.js';
  * @property {string} [strokeColor='#888888'] - Color of the road stroke
  */
 
+
+
 /**
  * Draws contour lines on an SVG element using Marching Squares.
  * @param {SVGElement} svg - The SVG element to append paths to
@@ -54,9 +57,27 @@ import { generateRoads } from './roads.js';
  * @param {ContourOptions} options - Contour interval and styling
  */
 export function drawContours(svg, heightmap, options) {
-  // Placeholder: Implement Marching Squares for contours
-  // For each contour level, generate paths and append to svg
-  // Example: svg.appendChild(pathEl)
+  console.log('🔍 drawContours: size=', heightmap.length, '×', heightmap[0].length, 'interval=', options.interval);
+
+  // Generate segments for multiple contour levels
+  const minVal = Math.min(...heightmap.flat());
+  const maxVal = Math.max(...heightmap.flat());
+  
+  let allSegments = [];
+  for (let level = minVal; level <= maxVal; level += options.interval) {
+    const segments = generateSegments(heightmap, level);
+    allSegments = allSegments.concat(segments);
+  }
+  console.log('🔍 drawContours: segments.length =', allSegments.length);
+
+  allSegments.forEach((seg, i) => {
+    const d = segToPathD(seg);
+    console.log(`✏️ drawContours: appending path #${i}`, d);
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', options.className || '');
+    svg.appendChild(path);
+  });
 }
 
 /**
@@ -167,6 +188,9 @@ export function drawRoads(svg, roads, options = {}) {
  * @param {RenderOptions & {...}} options - Rendering options
  */
 export function renderMap(target, data, options) {
+  console.log('🚀 renderMap target=', target);
+  console.log('   data keys=', Object.keys(data));
+  console.log('   options=', options);
   let svg;
   // If string, treat as container ID
   if (typeof target === 'string') {
@@ -239,29 +263,19 @@ export function renderMap(target, data, options) {
     drawRoads(svg, roads, 'road-debug');
   }
 
-  // Fill biomes
-  if (biomes && options.biomePalette) fillBiomes(svg, biomes, options.biomePalette);
-  // Draw coastline if options provided
-  if (typeof options.seaLevel === 'number' && typeof options.coastSmoothness === 'number') {
-    const seaMask = generateSeaMask(data.heightmap, options.seaLevel);
-    const smoothMask = smoothSeaMask(seaMask, options.coastSmoothness);
-    // Convert boolean mask to numeric for contouring
-    const maskNumeric = smoothMask.map(row => row.map(v => v ? 1 : 0));
-    drawContours(svg, maskNumeric, { interval: 0.5, className: 'coastline' });
-  }
-  // Draw contours
-  if (data.heightmap && options.contours) drawContours(svg, data.heightmap, options.contours);
-  // Draw rivers
-  if (data.rivers && options.rivers) drawRivers(svg, data.rivers, options.rivers);
-  // Draw roads and settlements overlays
-  if (data.roads && data.roads.length) drawRoads(svg, data.roads, options.roadRender);
-  if (data.towns && data.towns.length) drawSettlements(svg, data.towns, options.settlementRender);
-  // Draw settlements (main overlay)
-  if (settlements && !options.debugSettlements) {
-    drawSettlements(svg, settlements, 'settlement');
-  }
-  // Draw roads (main overlay)
-  if (roads && !options.debugRoads) {
-    drawRoads(svg, roads, 'road');
-  }
+  console.log('🔹 about to draw contours');
+  drawContours(svg, data.heightmap, options.contour);
+  console.log('🔹 drew contours; now drawing rivers');
+  drawRivers(svg, data.rivers, options.river);
+  console.log('🔹 drew rivers; now filling biomes');
+  fillBiomes(svg, data.biomeMap, options.biome);
+  console.log('🔹 filled biomes; now drawing roads');
+  drawRoads(svg, data.roads, options.roadRender);
+  console.log('🔹 drew roads; now drawing settlements');
+  drawSettlements(svg, data.towns, options.settlementRender);
+  console.log('🔹 drew settlements; now placing labels');
+  // placeRegionLabels(svg, data.centroids.map(c=>c), /* supply names and options */);
+  // placeRiverLabels(svg, data.rivers, /* names */, options.label);
+  // placeTownLabels(svg, data.towns, options.label);
+  console.log('🔹 finished renderMap');
 } 

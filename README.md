@@ -27,6 +27,7 @@ npm start
 - `src/utils/labels.js` — SVG label placement for regions, towns, and rivers (`placeRegionLabels`, `placeTownLabels`, `placeRiverLabels`). DOM/JSDOM focused, with full test coverage.
 - `src/utils/render.js` — SVG rendering pipeline for map elements. Exports `drawSettlements` and `drawRoads` with full rendering options and typedefs. Integrates coastline rendering (see options: `seaLevel`, `coastSmoothness`), moisture map generation (`moisture`), settlement placement (`settlements`), road network generation (`roads`), and debug overlays for moisture (`debugMoisture`), settlements (`debugSettlements`), and roads (`debugRoads`). Biomes now reflect the generated moisture field. Requires a DOM environment (jsdom) for testing.
 - `src/utils/export.js` — Export utilities for exporting map data and SVG renderings.
+- `src/utils/contours.js` — Marching squares implementation for generating contour lines from 2D elevation grids. Exports `generateSegments(field, level)` and `segToPathD(segment)` for SVG path conversion.
 - `DEVLOG.md` — Development log tracking changes and decisions.
 
 ## Tests
